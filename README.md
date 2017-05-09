@@ -15,14 +15,13 @@ The code is pure python, main componenets are
 ## NMR-STAR relational mappings
 
 The format of NMR-STAR 3 (and PDB's mmCIF) tag names is `_`**`table`**`.`**`column`**, that is: underscore -
-table name (aka tag category) - dot - column name (aka tag name), maikng the mapping from NMR-STAR/mmCIF
+table name (aka tag category) - dot - column name (aka tag name), making the mapping from NMR-STAR/mmCIF
 to relational tables straightforward. The gotchas:
 
 * Because some of the names are SQL reserved words, this library double-quotes them all and makes 
-them case-sensitive as a side-effect. This is important to remember when writing your own SQL statements
-to access the data.
+them case-sensitive as a side-effect.
 
-* NMR-STAR uses "saveframe" block and has several "special" tags and rules to maintain saveframe information
+* NMR-STAR uses "saveframe" block and has several special tags and rules to maintain saveframe information
 in the relational tables:
 
   * `Sf_framecode` tags contain the name of the parent saveframe (saveframe names must be unique within
@@ -36,3 +35,10 @@ in the relational tables:
   * Last but not least, there is a convenience key: `Sf_ID` that is autoincremented insteger, unique per
     saveframe accross the entire database with multiple entries. It is regenerated on database reload,
     `Sf_ID` tags never appear in the NMR-STAR files.
+
+## Usage
+
+See `test` subdirectory for code examples.
+
+BMRB SAS parser and an NMR-STAR dictionary are required (the latter is available from BMRB's subversion
+repository: http://svn.bmrb.wisc.edu/svn/nmr-star-software-dictionaries/validator/development/dict.sqlt3)
