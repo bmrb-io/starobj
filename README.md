@@ -8,13 +8,13 @@ The code is pure python, main componenets are
 
 * database loader (`parser.py`),
 * pretty printer (`unparser.py`),
-* NMR-STAR data access classes (`entry.py` and startable.py`)
+* NMR-STAR data access classes (`entry.py` and `startable.py`)
 * NMR-STAR dictionary wrapper (`stardict.py`)
 * and a poor man's DB abstraction layer (`db.py`)
 
 ## NMR-STAR relational mappings
 
-The format of NMR-STAR 3 (and PDB's mmCIF) tag names is `_**table**.**column**`, that is: underscore -
+The format of NMR-STAR 3 (and PDB's mmCIF) tag names is `_`**`table`**`.`**`column`**, that is: underscore -
 table name (aka tag category) - dot - column name (aka tag name), maikng the mapping from NMR-STAR/mmCIF
 to relational tables straightforward. The gotchas:
 
