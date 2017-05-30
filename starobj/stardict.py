@@ -318,7 +318,7 @@ class StarDictionary( starobj.BaseClass ) :
     #
     def get_saveframe_comment( self, category ) :
         if self._verbose :
-            sys.stdout.write( "%s.get_sf_comment( %s )" % (self.__class__.__name__, category,) )
+            sys.stdout.write( "%s.get_saveframe_comment( %s )" % (self.__class__.__name__, category,) )
 
         assert category is not None
         rc = None
@@ -334,9 +334,17 @@ class StarDictionary( starobj.BaseClass ) :
 # boolean flag is true/false in this table, not Y/N
 #
         for row in rs :
-            if row[1] is None : rc = (row[0], False)
-            elif str( row[1] ).strip().upper() in ("N", "FALSE") : rc = (row[0], False)
-            else : rc = (row[0], True)
+            comment = row[0]
+            if comment is not None :
+                if str( comment ).strip() in (".", "?") :
+                    comment = None
+            if comment is None :
+                return None
+
+            if row[1] is None : rc = (comment, False)
+            elif str( row[1] ).strip().upper() in ("N", "FALSE") : rc = (comment, False)
+            else : rc = (comment, True)
+
         return rc
 
     # List mandatory tables in saveframe category
@@ -518,7 +526,7 @@ class StarDictionary( starobj.BaseClass ) :
                 rc = True
         return rc
 
-    # Return loopflag, primary key tags, or all tags in the table (ordered list)
+    # Return row index flag, primary key tags, or all tags in the table (ordered list)
     # (only column names: intended use is in order by clause)
     # return none if table is not valid
     #
@@ -532,7 +540,7 @@ class StarDictionary( starobj.BaseClass ) :
 
         qry = "select tagfield from "
         qry += tbl
-        qry += " where upper(loopflag)='Y' and tagcategory=:table order by dictionaryseq"
+        qry += " where upper(rowindexflg)='Y' and tagcategory=:table order by dictionaryseq"
 
         params = { "table" : table }
         rc = []
@@ -541,19 +549,22 @@ class StarDictionary( starobj.BaseClass ) :
 # there should be only one
 #
         for row in rs :
-            rc.append( row[0] )
+            rc.append( (row[0], "int") )
 
         if len( rc ) > 0 :
             return rc
 
 # try primary key
 #
-        qry = "select tagfield from "
+        qry = "select tagfield,bmrbtype from "
         qry += tbl
         qry += " where upper(primarykey)='Y' and tagcategory=:table order by dictionaryseq"
         rs = self.query( sql = qry, params = params )
         for row in rs :
-            rc.append( row[0] )
+            if row[1] in ("int", "float") :
+                rc.append( (row[0], row[1]) )
+            else :
+                rc.append( (row[0], "text") )
 
         if len( rc ) > 0 :
             return rc

@@ -269,7 +269,7 @@ class StarWriter( starobj.BaseClass ) :
             for sfid in sfids :
 
                 if self._has_printable_data( sfid, tables ) :
-                    if comment is not None :
+                    if (comment is not None) and (comment not in (".", "?") ) :
 #                        sys.stdout.write( "--- comment is\n" )
 #                        pprint.pprint( comment )
                         for j in range( self._indent * self._tabwidth ) : out.write( " " )
@@ -299,7 +299,7 @@ class StarWriter( starobj.BaseClass ) :
 
 # unparse free table anyway
 #
-                    if comment is not None :
+                    if (comment is not None) and (comment not in (".", "?")) :
                         for j in range( self._indent * self._tabwidth ) : out.write( " " )
                         out.write( comment[0] )
                         if not comment[0].endswith( "\n" ) : out.write( "\n" )

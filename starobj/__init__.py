@@ -16,12 +16,12 @@ if PY3 : raise NotImplementedError( "python 3 no use" )
 import unicodedata
 import re
 
-SAS_PATH = "/share/dmaziuk/projects/sas-github/SAS/python/"
+SAS_PATH = "/share/dmaziuk/projects/sas/SAS/python/"
 #SAS_PATH = "/bmrb/lib/python27"
 sys.path.append( SAS_PATH )
 import sas
 
-from _baseclass import BaseClass
+from ._baseclass import BaseClass
 
 from .error import Error
 from .db import DbWrapper

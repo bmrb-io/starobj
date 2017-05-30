@@ -353,7 +353,12 @@ class DataTable( starobj.BaseClass ) :
         if sort is None :
             cols = self._dict.get_sort_key( self._table )
             if cols is not None :
-                sort = ' order by "%s"' % (('","'.join( c for c in cols )),)
+                sort = " order by "
+                for c in cols :
+                    if c[1] == "int" : sort += 'cast("%s" as integer),' % (c[0],)
+                    elif c[1] == "float" : sort += 'cast("%s" as float),' % (c[0],)
+                    else : sort += '"%s",' % (c[0],)
+                sort = sort[:-1]
         else :
             sort = ' order by ' + sort
 

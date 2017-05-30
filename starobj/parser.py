@@ -38,7 +38,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
     #
     #
     @classmethod
-    def parse( cls, fp, db, dictionary, errlist = None, verbose = False ) :
+    def parse( cls, fp, db, dictionary, errlist = None, types = True, verbose = False ) :
         if verbose :
             sys.stdout.write( "%s.parse()\n" % (cls.__name__,) )
 
@@ -46,7 +46,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
 
         h = cls( db = db, dictionary = dictionary, errlist = errlist )
         h.verbose = verbose
-        h.use_types = True
+        h.use_types = types
 
         l = starobj.sas.StarLexer( fp = fp, bufsize = 0, verbose = verbose )
         p = starobj.sas.SansParser.parse( lexer = l, content_handler = h, error_handler = h, verbose = verbose )
@@ -57,13 +57,13 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
     #
     #
     @classmethod
-    def parse_file( cls, filename, db, dictionary, errlist = None, verbose = False ) :
+    def parse_file( cls, filename, db, dictionary, errlist = None, types = True, verbose = False ) :
 
         if not os.path.exists( filename ) :
             raise IOError( "File not found: %s" % (filename,) )
         rc = False
         with open( filename, "rb" ) as inf :
-            rc = cls.parse( fp = inf, db = db, dictionary = dictionary, errlist = errlist, verbose = verbose )
+            rc = cls.parse( fp = inf, db = db, dictionary = dictionary, errlist = errlist, types = types, verbose = verbose )
         return rc
 
     #
@@ -216,7 +216,6 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
     #
     def error( self, line, msg ) :
         self._errlist.append( starobj.Error( starobj.Error.ERR, line, self.SRC, "parse error: " + msg ) )
-        self._errs += 1
         return True
 
     #
