@@ -13,3 +13,10 @@ def timer( label, silent = False ) :
         end = time.time()
         if not silent :
             sys.stdout.write( "%s: %0.3f\n" % (label,(end - start)) )
+
+from .passthru import passthru
+
+__all__ = [ "timer",
+    "passthru" ]
+
+#

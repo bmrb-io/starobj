@@ -16,6 +16,7 @@ import pgdb
 import sqlite3
 import re
 import pprint
+import csv
 
 # self
 #
@@ -322,6 +323,7 @@ class DbWrapper( starobj.BaseClass ) :
     #
     def query( self, connection, sql, params = None, newcursor = False ) :
         return DbWrapper.ResultSet( cursor = self.execute( connection, sql, params, newcursor ) )
+
 
 #
 #

@@ -191,6 +191,8 @@ class DataTable( starobj.BaseClass ) :
                 if row[0] in ( "BMRB_annotator", "BMRB_internal_directory_name", "Author_approval_type",
                                "Assigned_PDB_ID", "Assigned_PDB_deposition_code", "Assigned_restart_ID") :
                     continue
+            if (self._table == "Upload_data") and (row[0] == "Data_file_immutable_flag") :
+                    continue
 
 # row index?
 #
