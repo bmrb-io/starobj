@@ -15,8 +15,8 @@ The code is pure python, main componenets are
 ## NMR-STAR relational mappings
 
 The format of NMR-STAR 3 (and PDB's mmCIF) tag names is `_`**`table`**`.`**`column`**, that is: underscore -
-table name (aka tag category) - dot - column name (aka tag name), making the mapping from NMR-STAR/mmCIF
-to relational tables straightforward. The gotchas:
+table name (aka tag category) - dot - column name (aka tag name). The mapping from NMR-STAR/mmCIF to relational 
+tables is straightforward except for the gotchas:
 
 * Because some of the names are SQL reserved words, this library double-quotes them all and makes 
 them case-sensitive as a side-effect.
