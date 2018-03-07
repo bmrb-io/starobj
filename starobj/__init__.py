@@ -16,8 +16,8 @@ if PY3 : raise NotImplementedError( "python 3 no use" )
 import unicodedata
 import re
 
-SAS_PATH = "/share/dmaziuk/projects/sas/SAS/python/"
-#SAS_PATH = "/bmrb/lib/python27"
+#SAS_PATH = "/share/dmaziuk/projects/sas/SAS/python/"
+SAS_PATH = "/bmrb/lib/python27"
 sys.path.append( SAS_PATH )
 import sas
 
@@ -49,6 +49,7 @@ ENCODING = "iso8859-15"
 #
 def next_sfid( curs, verbose = False ) :
 
+    raise DeprecationWarning( "do not use" )
 # can't assert the cursor b/c it could be psycopg2 or sqlite3
 #
     sql = "select max(sfid) from entry_saveframes"
@@ -64,6 +65,7 @@ def next_sfid( curs, verbose = False ) :
 #
 def last_sfid( curs, verbose = False ) :
 
+    raise DeprecationWarning( "use NMRSTAREntry.last_sfid() instead" )
     sql = "select max(sfid) from entry_saveframes"
     curs.execute( sql )
     row = curs.fetchone()
@@ -178,6 +180,8 @@ def check_quote( value, verbose = False ) :
             return (DEFAULT_QUOTE, DEFAULT_QUOTE + string + DEFAULT_QUOTE)
 
     return (sas.TOKENS["CHARACTERS"], string)
+
+###########################################
 
 #
 #

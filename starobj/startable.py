@@ -214,7 +214,7 @@ class DataTable( starobj.BaseClass ) :
 
 # print flag is O, Y, or N. "N" + "printable_only" = don't print
 #
-            if ("n" == str( row[9] ).strip().lower()) and not self._dict.printable_tags_only :
+            if ("n" == str( row[9] ).strip().lower()) and self._dict.printable_tags_only :
                 continue
 
 # exclude internal-only tags in public mode

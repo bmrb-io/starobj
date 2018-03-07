@@ -36,6 +36,10 @@ in the relational tables:
     saveframe accross the entire database with multiple entries. It is regenerated on database reload,
     `Sf_ID` tags never appear in the NMR-STAR files.
 
+This code creates one additiona table (in `parser.py`): `entry_saverames(category text, entryid text,
+sfid integer, name text, line integer)`. It is needed to keep track of various housekeeping info,
+e.g. line numbers for error reporting, auto-generated `sfid` primary keys, etc.
+
 ## Usage
 
 See `test` subdirectory for code examples.

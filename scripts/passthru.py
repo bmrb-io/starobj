@@ -14,16 +14,16 @@ import argparse
 STAROBJ_DIR = os.path.abspath( os.path.join( os.path.split( __file__ )[0], ".." ) )
 sys.path.append( STAROBJ_DIR )
 import starobj
-import tests
+import scripts
 
 
 #
 #
 def passthru( config, infile = None, outfile = None, public = False, alltags = False, types = False, verbose = False, time = False ) :
 
-    with tests.timer( label = "starobj", silent = (not time) ) :
+    with scripts.timer( label = "starobj", silent = (not time) ) :
         errors = []
-        with tests.timer( label = "init", silent = (not time) ) :
+        with scripts.timer( label = "init", silent = (not time) ) :
             wrp = starobj.DbWrapper( config = cp, verbose = verbose ) # True )
             wrp.connect()
 
@@ -31,7 +31,7 @@ def passthru( config, infile = None, outfile = None, public = False, alltags = F
             sd.printable_tags_only = (not alltags)
             sd.public_tags_only = public
 
-        with tests.timer( label = "parse", silent = (not time) ) :
+        with scripts.timer( label = "parse", silent = (not time) ) :
             if infile is None :
                 p = starobj.StarParser.parse( db = wrp, dictionary = sd, fp = sys.stdin, errlist = errors, types = types, verbose = verbose )
             else :
@@ -44,7 +44,7 @@ def passthru( config, infile = None, outfile = None, public = False, alltags = F
 
                 del errors[:]
 
-        with tests.timer( label = "pretty-print", silent = (not time) ) :
+        with scripts.timer( label = "pretty-print", silent = (not time) ) :
             star = starobj.NMRSTAREntry( wrp, verbose = verbose )
             with open( outfile, "w" ) as out :
                 u = starobj.StarWriter.pretty_print( entry = star, dictionary = sd, out = out, errlist = errors, verbose = verbose )

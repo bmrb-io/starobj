@@ -34,7 +34,7 @@ class StarWriter( starobj.BaseClass ) :
     #
     @classmethod
     def pretty_print( cls, entry, dictionary, out, errlist = None, entryid = None, comments = True,
-            verbose = False ) :
+            public = True, alltags = False, sfids = False, verbose = False ) :
         u = cls( verbose = verbose )
         if errlist is None :
             errlist = []
@@ -43,6 +43,9 @@ class StarWriter( starobj.BaseClass ) :
         u.print_comments = comments
         u.entry = entry
         u.dictionary = dictionary
+        u._public_tags_only = public
+        u._printable_tags_only = (not alltags)
+        u._sfids = sfids
         u.unparse( out )
 
         return u
@@ -51,10 +54,10 @@ class StarWriter( starobj.BaseClass ) :
     #
     @classmethod
     def pretty_print_file( cls, entry, dictionary, filename, errlist = None, entryid = None, comments = True,
-            verbose = False ) :
+            public = True, alltage = False, sfids = False, verbose = False ) :
         rc = None
         with open( filename, "wb" ) as out :
-            rc = cls.pretty_print( cls, entry, dictionary, out, errlist, entryid, comments, verbose )
+            rc = cls.pretty_print( cls, entry, dictionary, out, errlist, entryid, comments, public, alltags, sfids, verbose )
         return rc
 
     #

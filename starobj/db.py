@@ -3,7 +3,7 @@
 # poor man's abstraction layer for pgdb and sqlite3
 #
 # this will replace ":NAME" placeholders in SQL statements with "%(NAME)s" if the engine is pgdb
-# input SQL has to use ":NAME" and must include all the proper quoteing and schema names etc.
+# input SQL has to use ":NAME" and must include all the proper quoting and schema names etc.
 # all parameters must be named, there's no support for '?'/'%s' placeholders
 #
 
@@ -26,7 +26,7 @@ import starobj
 
 class DbWrapper( starobj.BaseClass ) :
 
-    """Wrapper for sqlite3 and pgdb"""
+    """Simple stupid wrapper for sqlite3 and pgdb"""
 
     CONNECTIONS = ("dictionary", "entry")
     ENGINES = ("pgdb", "sqlite3")
@@ -68,27 +68,33 @@ class DbWrapper( starobj.BaseClass ) :
 
         """dict-like wrapper for SQL insert"""
 
+        # db: DbWrapper
+        # connection: name, entry or dictionary
         #
-        #
-        def __init__( self, db, connection, table = None, schema = None, verbose = False ) :
-            assert isinstance( db, starobj.DbWrapper )
+        def __init__( self, db, connection, table = None, verbose = False ) :
+            try :
+                assert isinstance( db, starobj.DbWrapper )
+            except :
+                sys.stderr.write( type( db ).__name__ + "\n" )
+                raise
+
             self._db = db
             self._connection = connection
             self._items = {}
             self._table = table
-            self._schema = schema
+#            self._schema = schema
             self._verbose = bool( verbose )
 
         #
         #
-        @property
-        def schema( self ) :
-            """in case there's a db schema"""
-            return self._schema
-        @schema.setter
-        def schema( self, name ) :
-            self._schema = str( name ).strip()
-            if self._schema == "" : self._schema = None
+#        @property
+#        def schema( self ) :
+#            """in case there's a db schema"""
+#            return self._schema
+#        @schema.setter
+#        def schema( self, name ) :
+#            self._schema = str( name ).strip()
+#            if self._schema == "" : self._schema = None
 
         #
         #
@@ -107,14 +113,14 @@ class DbWrapper( starobj.BaseClass ) :
 
         #
         #
-        @property
-        def sfid( self ) :
-            """last inserted saveframe id"""
-            return self._last_sfid
-        @sfid.setter
-        def sfid( self, sfid ) :
-            assert sfid is not None
-            self._sfid = int( sfid )
+#        @property
+#        def sfid( self ) :
+#            """last inserted saveframe id"""
+#            return self._sfid
+#        @sfid.setter
+#        def sfid( self, sfid ) :
+#            assert sfid is not None
+#            self._sfid = int( sfid )
 
         #
         #
@@ -145,6 +151,10 @@ class DbWrapper( starobj.BaseClass ) :
                 sys.stdout.write( "%s.clear()\n" % (self.__class__.__name__,) )
             assert isinstance( self._items, dict )
             self._items.clear()
+            if self._verbose :
+                sys.stdout.write( "*** items is now ***\n" )
+                pprint.pprint( self._items )
+                sys.stdout.write( "********************\n" )
 
         # clear + wipe out table name
         #
@@ -171,21 +181,23 @@ class DbWrapper( starobj.BaseClass ) :
 #
             have_sfid = (("Sf_ID" in self._items.keys()) and (self._items["Sf_ID"] is not None))
             if not have_sfid :
-                self._items["Sf_ID"] = starobj.last_sfid( self._db._connections["entry"]["curs"], verbose = self._verbose )
+                self._items["Sf_ID"] = starobj.NMRSTAREntry.last_sfid( db = self._db )
 
 # we don't quote scheme names but do need to quote table and column names
 #
-            if self._schema is not None :
-                tbl = '%s."%s"' % (self._schema, self._table,)
+            scam = self._db.schema( self._connection )
+            if scam is not None :
+                tbl = '%s."%s"' % (scam, self._table,)
             else :
                 tbl = '"%s"' % (self._table,)
 
 # sort order should be the same
 #
-            colstr = '","'.join( c for c in sorted( self._items.keys() ) )
-            valstr = ",:x".join( c.lower() for c in sorted( self._items.keys() ) )
+            tmpwtf = sorted( self._items.keys() )
+            colstr = '","'.join( c for c in tmpwtf )
+            valstr = ",:x".join( c.lower() for c in tmpwtf )
             params = {}
-            for c in self._items.keys() :
+            for c in tmpwtf : # self._items.keys() :
                 params[ "x%s"% (c.lower(),) ] = self._items[c]
 
             stmt = 'insert into %s ("%s") values (:x%s)' % (tbl,colstr,valstr,)
@@ -284,7 +296,7 @@ class DbWrapper( starobj.BaseClass ) :
     #   and NAME must match re (\w+)
     # if newcursor is false, re-use existing cursor
     #
-    def execute( self, connection, sql, params = None, newcursor = False ) :
+    def execute( self, connection, sql, params = None, newcursor = False, commit = False ) :
         if self._verbose : sys.stdout.write( "%s.execute(%s,%s)\n" % (self.__class__.__name__,connection,sql,) )
 
         assert connection in self.CONNECTIONS
@@ -305,16 +317,25 @@ class DbWrapper( starobj.BaseClass ) :
 # debug
 #
         if self._verbose :
+#            print type( stmt )
             if params is not None :
                 sys.stdout.write( self._param_pat.sub( r"%(\g<2>)s", sql ) % params )
             else :
                 sys.stdout.write( stmt )
             sys.stdout.write( "\n" )
 
-        if params is not None :
-            curs.execute( stmt, params )
-        else :
-            curs.execute( stmt )
+        try :
+            if params is not None :
+                curs.execute( stmt, params )
+            else :
+                curs.execute( stmt )
+        except :
+            sys.stderr.write( stmt + "\n" )
+            pprint.pprint( params )
+            raise
+
+        if commit :
+            self._connections[connection]["conn"].commit()
 
         return curs
 

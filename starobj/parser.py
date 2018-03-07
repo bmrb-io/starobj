@@ -68,7 +68,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
 
     #
     #
-    def __init__( self, db, dictionary, errlist = None, verbose = False ) :
+    def __init__( self, db, dictionary, entry = None, errlist = None, verbose = False ) :
         if verbose :
             sys.stdout.write( "%s.__init__()\n" % (self.__class__.__name__,) )
 
@@ -84,6 +84,12 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
         self._verbose = bool( verbose )
 
         self._stat = None
+        if entry is not None :
+            assert isinstance( entry, starobj.NMRSTAREntry )
+            self._entry = entry
+        else :
+            self._entry = starobj.NMRSTAREntry( db = db, verbose = verbose )
+
         self._tag_pat = re.compile( r"_([^.]+)\.(.+)" )
         self._int_pat = re.compile( r"^\d+$" )
         self._entryid = None
@@ -91,6 +97,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
         self._first_tag = None
         self._row_num = 0
         self._use_types = False
+        self._free_table = None
 
     # error list may contain warning and/or info messages, or garbage from before. if it's the latter:
     #  we get to keep the pieces.
@@ -140,51 +147,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
     def _create_tables( self, dictionary ) :
         if self._verbose :
             sys.stdout.write( "%s._create_tables()\n" % (self.__class__.__name__,) )
-
-        assert isinstance( dictionary, starobj.StarDictionary )
-
-        cols = []
-        for table in dictionary.iter_tables() :
-            del cols[:]
-            for (t,column,dbtype) in dictionary.iter_tags( columns = ("dbtype",), tables = (table,) ) :
-
-# NOTE! this stores floats as varchar( 63 ) to keep training zeroes and sidestep teh precision and
-# rounding error issues.
-#
-                if dbtype.lower() == "float" :
-                    cols.append( '"%s" varchar(63)' % (column,) )
-                else :
-                    if self._use_types :
-                        if dbtype.lower().startswith( "char" ) \
-                        or dbtype.lower().startswith( "varchar" ) \
-                        or dbtype.lower().startswith( "vchar" ) \
-                        or dbtype.lower().startswith( "text" ) :
-                            cols.append( '"%s" text' % (column,) )
-                        elif dbtype.lower().startswith( "date" ) :
-                            cols.append( '"%s" date' % (column,) )
-                        elif dbtype.lower().startswith( "int" ) :
-                            cols.append( '"%s" integer' % (column,) )
-                        else :
-#                            raise LookupError
-                            sys.stderr.write( "Unsupported DBTYPE %s for _%s.%s" % (dbtype, table, column ) )
-                            cols.append( '"%s" text' % (column,) )
-                    else :
-                        cols.append( '"%s" text' % (column,) )
-
-            if len( cols ) < 1 :
-                sys.stderr.write( "No columns in %s\n" % (table,) )
-                continue
-
-            stmt = 'create table "%s" (%s)' % (table,",".join( c for c in cols ))
-            if self._verbose :
-                sys.stdout.write( stmt + "\n" )
-
-            self._db.execute( connection = self.CONNECTION, sql = stmt )
-
-# entry saveframes
-#
-        stmt = "create table entry_saveframes (category text,entryid text,sfid integer,name text,line integer)"
-        self._db.execute( connection = self.CONNECTION, sql = stmt )
+        raise DeprecationWarning( "use NMRSTAREntry.create_tables() instead" )
 
     # insert into entry_saveframes table
     # columns: entryid, sfid, name, line, category
@@ -193,16 +156,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
     def _insert_saveframe( self, name, line, category = None ) :
         if self._verbose :
             sys.stdout.write( "%s._insert_saveframe(%s,%s)\n" % (self.__class__.__name__,name,line) )
-
-        sql = "insert into entry_saveframes (category,entryid,sfid,name,line) " \
-            + "values (:sfcat,:id,:sfid,:name,:line)"
-        params = { "sfcat" : category,
-                "id" : self._entryid,
-                "sfid" : (starobj.last_sfid( self._db._connections[self.CONNECTION]["curs"]) + 1 ),
-                "name" : name,
-                "line" : line
-                }
-        rs = self._db.execute( connection = self.CONNECTION, sql = sql, params = params )
+        raise DeprecationWarning( "use NMRSTAREntry.insert_saveframe() instead" )
 
 ####################################################################################################
 # SAS handlers
@@ -239,9 +193,12 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
             self._errlist.append( starobj.Error( starobj.Error.ERR, line, self.SRC,
                     "Data block ID not an %s string: %s" % (starobj.ENCODING, name) ) )
 
-        self._create_tables( self._dictionary )
+        starobj.NMRSTAREntry.create_tables( dictionary = self._dictionary, db = self._db,
+                use_types = self.use_types, verbose = self._verbose )
+
         self._stat = starobj.DbWrapper.InsertStatement( db = self._db, connection = self.CONNECTION,
-                schema = self._db.schema( connection = self.CONNECTION ), verbose = self._verbose )
+                 verbose = self._verbose )
+#schema = self._db.schema( connection = self.CONNECTION ),
         return False
 
     # save_NAME
@@ -250,13 +207,14 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
     def startSaveframe( self, line, name ) :
         assert self._stat is not None
         self._table_name = None
+        self._free_table = None
         try :
             name.decode( starobj.ENCODING )
         except UnicodeError :
             self._errlist.append( starobj.Error( starobj.Error.ERR, line, self.SRC,
                 "Saveframe name not an %s string: %s" % (starobj.ENCODING, name) ) )
 
-        self._insert_saveframe( name = name, line = line )
+        self._entry.insert_saveframe( name = name, line = line )
 
         return False
 
@@ -270,9 +228,17 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
 #
             if not self._stat.insert() :
                 self._errlist.append( starobj.Error( starobj.Error.CRIT, line, self.SRC,
-                    "sqlalchemy insert error in row %d" % (self._row_num) ) )
+                    "DB insert error in row %d" % (self._row_num) ) )
                 return True
             self._stat.reset()
+
+# add saveframe category to index table
+#
+        if self._free_table is None : raise Exception( "No free table" )
+        cat = self._dictionary.get_saveframe_category( self._free_table )
+        if cat is None : raise Exception( "No saveframe category for free table " + self._free_table )
+        sql = "update entry_saveframes set category=:cat where name=:nip" 
+        self._entry.execute( sql, params = { "cat" : cat, "nip" : name } )
 
         return False
 
@@ -289,7 +255,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
         if len( self._stat ) > 0 :
             rc = self._stat.insert()
             if rc != 1 :
-                msg = "insert error: %s rows inserted" % (rc,)
+                msg = "insert error: %s rows inserted (there should be only one)" % (rc,)
                 self._errlist.append( starobj.Error( starobj.Error.CRIT, line, self.SRC, msg ) )
                 return True
 
@@ -309,7 +275,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
 #
         rc = self._stat.insert()
         if rc != 1 :
-            msg = "insert error: %s rows inserted" % (rc,)
+            msg = "insert error: %s rows inserted (there should be only one)" % (rc,)
             self._errlist.append( starobj.Error( starobj.Error.CRIT, line, self.SRC, msg ) )
             return True
 
@@ -351,6 +317,12 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
 #
         if self._stat.table is None :
             self._stat.table = m.group( 1 )
+
+# if free table: we'll need its name in endSaveframe()
+#
+            if not inloop :
+                self._free_table = m.group( 1 )
+
         else :
             if self._stat.table != m.group( 1 ) :
                 e = starobj.Error( starobj.Error.CRIT, tagline, self.SRC,
@@ -359,9 +331,10 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
                 self._errlist.append( e )
                 return True
 
+        if inloop :
+
 # true @ start of loop
 #
-        if inloop :
             if self._first_tag is None :
                 self._first_tag = m.group( 2 )
                 self._row_num += 1 # = 1
@@ -375,6 +348,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
                             "db insert error in row %d" % (self._row_num) ) )
                         return True
                     self._row_num += 1
+
 
 #
 #
