@@ -100,40 +100,53 @@ def toascii( s ) :
     else :
         return unicodedata.normalize( "NFKD", v.decode( "utf-8" ) ).encode( "ascii", "ignore" )
 
+# this does rstrip() because we probably never want to keep trailing whitespace
+#
 def sanitize( s ) :
     if s is None : return None
     string = str( s ).strip()
     if string == "" : return None
-    return toascii( string )
+    return toascii( str( s ).rstrip() )
 
+#
+#
+#
 def check_quote( value, verbose = False ) :
+
+    """returns pair (quoting style, quoted sanitized value)"""
 
     global LONG_VALUE
     global DEFAULT_QUOTE
 
-    value = toascii( value )
+#    value = toascii( value )
     string = sanitize( value )
     if string is None : return (sas.TOKENS["CHARACTERS"], ".")
 
-# return multi-line values as is
+# multi-line values
+#  we probably always want to remove trailing whitespace
+#    but not leading whitespace
 #
     if "\n" in string :
         if verbose : sys.stdout.write( "Has newline\n" )
 
 # TODO: this is where we look for \n; and return triple-quote instead
 #
-        if value.startswith( "\n" ) : buf = ";"
-        else : buf = ";\n"
-        if value.endswith( "\n" ) : buf += value
-        else : buf += value + "\n;\n"
-        return (sas.TOKENS["SEMISTART"], buf)
+        if string.startswith( "\n" ) : buf = "\n;"
+        else : buf = "\n;\n"
+#        if value.endswith( "\n" ) : buf += value + ";\n"
+#        else : buf += value + "\n;\n"
+#        buf += value.rstrip() + "\n;\n"
+        return (sas.TOKENS["SEMISTART"], buf + string + "\n;\n")
 
 # otherwise return them sanitized
 #
+    string = string.strip()
     if len( string ) > LONG_VALUE :
         if verbose : sys.stdout.write( "Too long\n" )
         return (sas.TOKENS["SEMISTART"], "\n;\n" + string + "\n;\n")
 
+# quote's a delimietr only at start/end of token
+#
     dq1 = re.compile( "(^\")|(\s+\")" )
     dq2 = re.compile( "\"\s+" )
     has_dq = False
@@ -157,7 +170,7 @@ def check_quote( value, verbose = False ) :
     if verbose and has_sq : sys.stdout.write( "Has single quote\n" )
 
     if has_sq and has_dq :
-        return (sas.TOKENS["SEMISTART"], "\n;\n" + string + "\n;\n")
+        return (sas.TOKENS["SEMISTART"], "\n;\n" + string.rstrip() + "\n;\n")
 
     if has_sq : return (sas.TOKENS["DOUBLESTART"], '"' + string + '"')
     if has_dq : return (sas.TOKENS["SINGLESTART"], "'" + string + "'")
@@ -166,12 +179,15 @@ def check_quote( value, verbose = False ) :
     if m :
         if verbose : sys.stdout.write( "Has space\n" )
 
-# technically not needed but most code out there can't handle them unquoted
+# in case some badly written lexer finds e.g. 'Peter O'Toole' confusing
+#  give 'em "Peter O'Toole"
 #
         if "'" in string : return (sas.TOKENS["DOUBLESTART"], '"' + string + '"')
         if '"' in string : return (sas.TOKENS["SINGLESTART"], "'" + string + "'")
         if verbose : sys.stdout.write( "Has space, no quotes\n" )
         return (DEFAULT_QUOTE, DEFAULT_QUOTE + string + DEFAULT_QUOTE)
+
+#
 
     for i in sas.KEYWORDS :
         m = i.search( string )

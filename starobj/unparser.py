@@ -572,9 +572,9 @@ class StarWriter( starobj.BaseClass ) :
                 if qs == starobj.sas.TOKENS["SEMISTART"] :
                     if self._verbose :
                         sys.stdout.write( ";;; writing |%s|\n" % (val,) )
-#                    out.write( "\n" )
+                    if not val.startswith( "\n" ) : out.write( "\n" )
                     out.write( val )
-#                    out.write( "\n" )
+                    if not val.endswith( "\n" ) : out.write( "\n" )
 
 # then align the next one w/ previous row (lengths[i] is 1 for semicolon-quoted values)
 #

@@ -44,6 +44,7 @@ def passthru( config, infile = None, outfile = None, public = False, alltags = F
 
                 del errors[:]
 
+        if outfile is None : return
         with scripts.timer( label = "pretty-print", silent = (not time) ) :
             star = starobj.NMRSTAREntry( wrp, verbose = verbose )
             with open( outfile, "w" ) as out :
@@ -85,5 +86,6 @@ if __name__ == "__main__" :
 
     passthru( cp, infile = args.infile, outfile = args.outfile, public = args.public, alltags = args.all_tags, 
         types = args.types, verbose = args.verbose, time = args.time )
+
 
 
