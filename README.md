@@ -2,6 +2,9 @@
 
 Table-based storage for BMRB's NMR-STAR 3.x.
 
+*This code is tied to BMRB's NMR-STAR data model and dictionary and is probably of limited
+utility to users outside of BMRB. You have been warned.*
+
 The tables are relational, `sqlite3` and `psycopg2` are supported.
 
 The code is pure python, main componenets are
@@ -44,5 +47,6 @@ e.g. line numbers for error reporting, auto-generated `sfid` primary keys, etc.
 
 See `test` subdirectory for code examples.
 
-BMRB SAS parser and an NMR-STAR dictionary are required (the latter is available from BMRB's subversion
-repository: http://svn.bmrb.wisc.edu/svn/nmr-star-software-dictionaries/validator/development/dict.sqlt3)
+BMRB SAS parser and an NMR-STAR dictionary are required. The former is on GitHub, the latter is available 
+from BMRB's subversion repository: 
+http://svn.bmrb.wisc.edu/svn/nmr-star-software-dictionaries/validator/development/dict.sqlt3

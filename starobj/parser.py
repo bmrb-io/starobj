@@ -38,7 +38,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
     #
     #
     @classmethod
-    def parse( cls, fp, db, dictionary, errlist = None, types = True, verbose = False ) :
+    def parse( cls, fp, db, dictionary, errlist = None, types = True, create_tables = True, verbose = False ) :
         if verbose :
             sys.stdout.write( "%s.parse()\n" % (cls.__name__,) )
 
@@ -57,13 +57,14 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
     #
     #
     @classmethod
-    def parse_file( cls, filename, db, dictionary, errlist = None, types = True, verbose = False ) :
+    def parse_file( cls, filename, db, dictionary, errlist = None, types = True, create_tables = True, verbose = False ) :
 
         if not os.path.exists( filename ) :
             raise IOError( "File not found: %s" % (filename,) )
         rc = False
         with open( filename, "rb" ) as inf :
-            rc = cls.parse( fp = inf, db = db, dictionary = dictionary, errlist = errlist, types = types, verbose = verbose )
+            rc = cls.parse( fp = inf, db = db, dictionary = dictionary, errlist = errlist, types = types,
+                    create_tables = create_tables, verbose = verbose )
         return rc
 
     #
@@ -98,6 +99,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
         self._row_num = 0
         self._use_types = False
         self._free_table = None
+        self._create_tables = True
 
     # error list may contain warning and/or info messages, or garbage from before. if it's the latter:
     #  we get to keep the pieces.
@@ -139,6 +141,16 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
     @use_types.setter
     def use_types( self, flag ) :
         self._use_types = bool( flag )
+
+    #
+    #
+    @property
+    def create_tables( self ) :
+        """if false, don't create database tables"""
+        return self._create_tables
+    @create_tables.setter
+    def create_tables( self, flag ) :
+        self._create_tables = bool( flag )
 
 ####################################################################################################
 #
@@ -193,8 +205,9 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
             self._errlist.append( starobj.Error( starobj.Error.ERR, line, self.SRC,
                     "Data block ID not an %s string: %s" % (starobj.ENCODING, name) ) )
 
-        starobj.NMRSTAREntry.create_tables( dictionary = self._dictionary, db = self._db,
-                use_types = self.use_types, verbose = self._verbose )
+        if self._create_tables :
+            starobj.NMRSTAREntry.create_tables( dictionary = self._dictionary, db = self._db,
+                    use_types = self.use_types, verbose = self._verbose )
 
         self._stat = starobj.DbWrapper.InsertStatement( db = self._db, connection = self.CONNECTION,
                  verbose = self._verbose )
