@@ -757,7 +757,7 @@ class StarDictionary( starobj.BaseClass ) :
 
     # return table name, datum count tag and datum name in the tables if there is one
     #
-    def iter_datumcount_tags( self, tables ) :
+    def iter_datumcount_tags( self, tables = None ) :
         if self._verbose :
             sys.stdout.write( "%s.iter_datumcount_tags()\n" % (self.__class__.__name__,) )
 

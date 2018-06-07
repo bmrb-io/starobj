@@ -57,15 +57,22 @@ class NMRSTAREntry( starobj.BaseClass ) :
     # create tables for the entry
     #
     @classmethod
-    def create_tables( cls, dictionary, db, use_types = True, verbose = False ) :
+    def create_tables( cls, dictionary, db, use_types = True, tables = None, verbose = False ) :
         if verbose :
             sys.stdout.write( "%s._create_tables()\n" % (cls.__name__,) )
 
         assert isinstance( dictionary, starobj.StarDictionary )
         assert isinstance( db, starobj.DbWrapper )
+        if tables is not None : assert isinstance( tables, collections.Iterable )
 
         cols = []
         for table in dictionary.iter_tables() :
+            if tables is not None :
+                if not table in tables :
+                    if verbose :
+                        sys.stdout.write( "skipping %s: not in list\n" % (table,) )
+                    continue
+
             del cols[:]
             for (t,column,dbtype) in dictionary.iter_tags( columns = ("dbtype",), tables = (table,) ) :
 
@@ -75,10 +82,15 @@ class NMRSTAREntry( starobj.BaseClass ) :
                 if dbtype.lower() == "float" :
                     cols.append( '"%s" varchar(63)' % (column,) )
                 else :
+
+# 2018-06-07 dictionary now uses boolean for what previously was yes/no char(3)
+#  the values are still yes/no though
+#
                     if use_types :
                         if dbtype.lower().startswith( "char" ) \
                         or dbtype.lower().startswith( "varchar" ) \
                         or dbtype.lower().startswith( "vchar" ) \
+                        or dbtype.lower().startswith( "boolean" ) \
                         or dbtype.lower().startswith( "text" ) :
                             cols.append( '"%s" text' % (column,) )
                         elif dbtype.lower().startswith( "date" ) :
@@ -117,7 +129,7 @@ class NMRSTAREntry( starobj.BaseClass ) :
         stmt += "entry_saveframes (category text,entryid text,sfid integer primary key,name text,line integer)"
         if verbose :
             sys.stdout.write( stmt + "\n" )
-        db.execute( connection = cls.CONNECTION, sql = stmt )
+        db.execute( connection = cls.CONNECTION, sql = stmt, commit = True )
 
     ###########################################################################################
     #
@@ -169,8 +181,8 @@ class NMRSTAREntry( starobj.BaseClass ) :
     #########################
     # shortcut for db.execute
     #
-    def execute( self, sql, params = None, newcursor = False ) :
-        return self._db.execute( self.CONNECTION, sql, params, newcursor )
+    def execute( self, sql, params = None, newcursor = False, commit = False ) :
+        return self._db.execute( self.CONNECTION, sql, params, newcursor, commit )
 
 
 ##################################################
@@ -313,9 +325,21 @@ class NMRSTAREntry( starobj.BaseClass ) :
 
     # update value
     #
-#    def set_value( self, table, column, sfid = None, value = None ) :
-#        if self._verbose : print self.__class__.__name__, "set_value( %s, %s, %s, %s )" % (table,column,sfid,value)
-
+    def set_value( self, table, column, sfid = None, value = None ) :
+        if self._verbose :
+            sys.stdout.write( "%s.set_value( %s, %s, %s, %s )\n" % (self.__class__.__name__,table,column,sfid,value) )
+        sql = 'update "%s" set "%s"=:val' % (table, column,)
+        params = { "val" : value }
+        if sfid is not None :
+            sql += ' where "Sf_ID"=:id'
+            params["id"] = sfid
+        if self._verbose :
+            sys.stdout.write( sql + "\n" )
+            pprint.pprint( params )
+        rc = self.execute( sql, params, newcursor = False, commit = True )
+        if self._verbose :
+            sys.stdout.write( "-> %d rows updated\n" % (rc.rowcount,) )
+        return rc.rowcount
 
 #
 #

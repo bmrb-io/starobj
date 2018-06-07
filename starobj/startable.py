@@ -104,7 +104,7 @@ class DataTable( starobj.BaseClass ) :
     @tags.setter
     def tags( self, tags ) :
         assert isinstance( tags, collections.Iterable )
-        self._tags = tags
+        self._tags = list( tags )
 
     #
     # iterable
@@ -380,7 +380,7 @@ class DataTable( starobj.BaseClass ) :
         return
 
     #
-    # return only rows that have "real data"
+    # return only "real data" columns
     #
     def next( self ) :
         if self._verbose :

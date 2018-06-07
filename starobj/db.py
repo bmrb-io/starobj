@@ -6,6 +6,8 @@
 # input SQL has to use ":NAME" and must include all the proper quoting and schema names etc.
 # all parameters must be named, there's no support for '?'/'%s' placeholders
 #
+# note that connection.autocommit does not work in pgdb but setting it is not an error.
+#
 
 from __future__ import absolute_import
 
@@ -17,6 +19,7 @@ import sqlite3
 import re
 import pprint
 import csv
+#import json
 
 # self
 #
@@ -237,7 +240,7 @@ class DbWrapper( starobj.BaseClass ) :
     # connect to both dictionary and entry databases and open a cursor in each
     #
     def connect( self ) :
-        if self._verbose : sys.stdout.write( self.__class__.__name__ + "._connect()\n" )
+        if self._verbose : sys.stdout.write( self.__class__.__name__ + ".connect()\n" )
         assert isinstance( self._props, ConfigParser.ConfigParser )
 
         for section in self.CONNECTIONS :
@@ -281,7 +284,7 @@ class DbWrapper( starobj.BaseClass ) :
                 self._connections[c]["conn"].close()
                 self._connections[c] = None
 
-    # schema for teh database
+    # schema for the database
     #
     def schema( self, connection ) :
         if self._verbose : sys.stdout.write( "%s.schema(%s)\n" % (self.__class__.__name__,connection,) )

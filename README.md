@@ -47,6 +47,11 @@ e.g. line numbers for error reporting, auto-generated `sfid` primary keys, etc.
 
 See `test` subdirectory for code examples.
 
-BMRB SAS parser and an NMR-STAR dictionary are required. The former is on GitHub, the latter is available 
+**Required**:
+
+BMRB SAS parser and an NMR-STAR dictionary. The former is on GitHub, the latter is available 
 from BMRB's subversion repository: 
 http://svn.bmrb.wisc.edu/svn/nmr-star-software-dictionaries/validator/development/dict.sqlt3
+
+PyGreSQL (although it can be trivially changed to `psycopg2`, see `db.py`), v.5 recommended.
+

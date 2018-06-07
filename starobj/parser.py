@@ -47,6 +47,7 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
         h = cls( db = db, dictionary = dictionary, errlist = errlist )
         h.verbose = verbose
         h.use_types = types
+        h.create_tables = create_tables
 
         l = starobj.sas.StarLexer( fp = fp, bufsize = 0, verbose = verbose )
         p = starobj.sas.SansParser.parse( lexer = l, content_handler = h, error_handler = h, verbose = verbose )
@@ -250,7 +251,10 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
         if self._free_table is None : raise Exception( "No free table" )
         cat = self._dictionary.get_saveframe_category( self._free_table )
         if cat is None : raise Exception( "No saveframe category for free table " + self._free_table )
-        sql = "update entry_saveframes set category=:cat where name=:nip" 
+        if self._db.schema( self.CONNECTION ) is not None :
+            sql = "update %s.entry_saveframes set category=:cat where name=:nip" % (self._db.schema( self.CONNECTION ),)
+        else :
+            sql = "update entry_saveframes set category=:cat where name=:nip" 
         self._entry.execute( sql, params = { "cat" : cat, "nip" : name } )
 
         return False
