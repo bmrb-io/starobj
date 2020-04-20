@@ -779,6 +779,40 @@ class StarDictionary( starobj.BaseClass ) :
         finally :
             rs.cursor.close()
 
+    # this is ugly.
+    # there are saveframe id tags that point to other safevrames, listed as foreign keys.
+    # tag names that end in "_ID(_.+)?" should have a corrsp. "_label(_.+)?" tag,
+    # maked with "sfpointerflg". that one's value whould be the name of the saveframe to which the
+    # foreing key ID tag is pointing. that is a STAR way of linking saveframes.
+    # (the IDs here are "lclidflg", not "sfidflg")
+    #
+    # so here we construct a list of
+    #   child( table, tag ) -> parent( table, tag )
+    # and let the downstream code figure out what to do with it
+    #
+    # this is limited to local ID and framcode tags for now and exclude entry ids
+    #
+    def iter_parent_child_tags( self ) :
+        if self._verbose :
+            sys.stdout.write( "%s.list_parent_child_tags()\n" % (self.__class__.__name__,) )
+
+        if self._schema is None : tbl = "adit_item_tbl"
+        else : tbl = "%s.adit_item_tbl" % (self._schema,)
+
+        qry =  "select t1.tagcategory,t1.tagfield,t2.tagcategory,t2.tagfield " \
+            + ("from %s t1 join %s t2 " % (tbl,tbl,)) \
+            + "on t2.tagcategory=t1.foreigntable and t2.tagfield=t1.foreigncolumn " \
+            + "where t1.foreigntable is not null and t1.foreigncolumn is not null " \
+            + "and (t2.sfnameflg='Y' or t2.lclsfidflg='Y') and t2.entryidflg<>'Y' " \
+            + "order by t2.dictionaryseq" 
+
+        rs = self.query( sql = qry, newcursor = True )
+        try :
+            for row in rs :
+                yield tuple( row )
+        finally :
+            rs.cursor.close()
+
     # This one takes full "_<table>.<column>" name or column, table pair.
     #
     def is_valid_tag( self, name, table = None ) :
@@ -1024,9 +1058,14 @@ if __name__ == "__main__" :
         sys.stdout.write( "is unique\n" )
     else :
         sys.stdout.write( "is replicable\n" )
+
+    cmt = sd.get_saveframe_comment( "entry_information" )
     sys.stdout.write( "SF comment is\n" )
-    sys.stdout.write( sd.get_saveframe_comment( "entry_information" ) )
-    sys.stdout.write( "\n" )
+    if cmt is not None :
+        sys.stdout.write( cmt[0] )
+        sys.stdout.write( "\n" )
+    else :
+        sys.stdout.write( "ERROR: None\n" )
 
     sys.stdout.write( "******* mandatory tables in entry information ********\n" )
     t = sd.get_mandatory_tables( "entry_information" )
@@ -1088,6 +1127,10 @@ if __name__ == "__main__" :
         sys.stdout.write( "yes\n" )
     else :
         sys.stdout.write( "no\n" )
+
+    sys.stdout.write( "******* parent-child IDs and labels: ********\n" )
+    for i in sd.iter_parent_child_tags() :
+        sys.stdout.write( "child: %s.%s -> parent %s.%s\n" % i )
 
 #
 #

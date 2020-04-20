@@ -40,15 +40,22 @@ class DbWrapper( starobj.BaseClass ) :
 #
     class ResultSet( object ) :
         def __init__( self, cursor ) :
+#            print "ResultSet: init",
             self._curs = cursor
         def __iter__( self ) :
+#            print "ResultSet: iter",
             return self
         def __next__( self ) :
+#            print "ResultSet: _next",
             rc = self._curs.fetchone()
+#            print "*** row"
+#            pprint.pprint( rc )
+#            print "***"
             if rc is None :
                 raise StopIteration
             return rc
         def next( self ) :
+#            print "ResultSet: next",
             return self.__next__()
         @property
         def cursor( self ) :
@@ -146,6 +153,24 @@ class DbWrapper( starobj.BaseClass ) :
         #
         def __contains__( self, key ) :
             return (key in self._items)
+
+        #
+        #
+        def keys( self ) :
+            if self._verbose :
+                sys.stdout.write( "%s.keys()\n" % (self.__class__.__name__,) )
+            assert isinstance( self._items, dict )
+            return self._items.keys()
+        def values( self ) :
+            if self._verbose :
+                sys.stdout.write( "%s.values()\n" % (self.__class__.__name__,) )
+            assert isinstance( self._items, dict )
+            return self._items.values()
+        def items( self ) :
+            if self._verbose :
+                sys.stdout.write( "%s.items()\n" % (self.__class__.__name__,) )
+            assert isinstance( self._items, dict )
+            return self._items.items()
 
         #
         #

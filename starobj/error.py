@@ -29,7 +29,7 @@ class Error( object ) :
 
     def __init__( self, svr, line, src, msg ) :
         self.svr = svr
-        self.line = line
+        self.line = str( line ).isdigit() and line or -1
         self.src = src
         self.msg = msg
 

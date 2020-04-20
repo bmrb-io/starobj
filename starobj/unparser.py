@@ -184,22 +184,42 @@ class StarWriter( starobj.BaseClass ) :
         if self._verbose :
             sys.stdout.write( "%s.unparse()\n" % (self.__class__.__name__,) )
 
-        sfcats = []
+        dictcats = []
         sfids = []
         tables = []
         for i in self._dict.iter_saveframe_categories() :
             if self._dict.is_printable_category( i[0] ) :
-                sfcats.append( i[0] )
+                dictcats.append( i[0] )
+        if len( dictcats ) < 1 :
+            self._errlist.append( starobj.Error( starobj.Error.WARN, 0, self.SRC,
+                "No printable saveframe categories in the dictionary" ) )
+            return False
+
+        sfcats = []
+        for (sfid, sfcat) in self._entry.iter_saveframes( columns = ("category",) ) :
+            if not sfcat in sfcats :
+                if sfcat in dictcats :
+                    sfcats.append( sfcat )
         if len( sfcats ) < 1 :
             self._errlist.append( starobj.Error( starobj.Error.WARN, 0, self.SRC,
-                "No printable saveframe categories" ) )
+                "No printable saveframe categories in the entry" ) )
             return False
 
         out.write( "data_%s\n\n" % (self._entry.id,) )
 
-# foreach printable saveframe category
+# sort saveframe categories in dictionary order
 #
-        for sfcat in sfcats :
+        categories = {}
+        num = 0
+        for i in self._dict.iter_saveframe_categories() : 
+            if i[0] in sfcats :
+                categories[num] = i[0]
+                num += 1
+
+# foreach printable saveframe category in the entry
+#
+        for k in sorted( categories.keys() ) :
+            sfcat = categories[k]
             freetable = self._dict.get_free_table( category = sfcat )
             if freetable is None :
                 self._errlist.append( starobj.Error( starobj.Error.CRIT, 0, self.SRC,
@@ -208,12 +228,17 @@ class StarWriter( starobj.BaseClass ) :
 
             sfidtag = None
             entryidtag = None
-            for i in self._dict.iter_tags( columns = ("sfidflg", "entryidflg",), which = ("sfid","entryid",),
+            localidtag = None
+            for i in self._dict.iter_tags( columns = ("sfidflg", "entryidflg","lclidflg",), 
+                    which = ("sfid","entryid","localid",),
+#            for i in self._dict.iter_tags( columns = ("lclidflg", "entryidflg",), which = ("localid","entryid",),
                     tables = (freetable,) ) :
                 if i[2] == "Y" :
                     sfidtag = i[1]
                 if i[3] == "Y" :
                     entryidtag = i[1]
+                if i[4] == "Y" :
+                    localidtag = i[1]
 
 # entry id must be filled in
 #
@@ -226,7 +251,9 @@ class StarWriter( starobj.BaseClass ) :
                 sys.stdout.write( "- Unparse saveframe category %s\n" % (sfcat,) )
 
             del sfids[:]
-            qry = 'select "%s" from "%s" where "%s"=:id order by "%s"' % (sfidtag,freetable,entryidtag,sfidtag)
+            if localidtag is None : sorttag = sfidtag
+            else : sorttag = localidtag
+            qry = 'select "%s" from "%s" where "%s"=:id order by "%s"' % (sfidtag,freetable,entryidtag,sorttag)
             rs = self._entry.query( sql = qry, params = { "id" : self._entry.id } )
             for row in rs :
                 sfids.append( row[0] )
