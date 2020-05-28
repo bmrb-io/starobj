@@ -5,7 +5,7 @@ Table-based storage for BMRB's NMR-STAR 3.x.
 *This code is tied to BMRB's NMR-STAR data model and dictionary and is probably of limited
 utility to users outside of BMRB. You have been warned.*
 
-The tables are relational, `sqlite3` and PostgreSQL (`pgdb`, `psycopg2` with a bit of editing) 
+The tables are relational, `sqlite3` and PostgreSQL (`pgdb`, or `psycopg2` with a bit of editing) 
 are supported.
 
 The code is pure python, main componenets are
