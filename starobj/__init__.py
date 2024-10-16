@@ -141,8 +141,8 @@ def check_quote( value, verbose = False ) :
 
 # quote's a delimietr only at start/end of token
 #
-    dq1 = re.compile( "(^\")|(\s+\")" )
-    dq2 = re.compile( "\"\s+" )
+    dq1 = re.compile(r"(^\")|(\s+\")")
+    dq2 = re.compile(r"\"\s+")
     has_dq = False
     m = dq1.search( string )
     if m : has_dq = True
@@ -152,8 +152,8 @@ def check_quote( value, verbose = False ) :
 
     if verbose and has_dq : sys.stdout.write( "Has double quote\n" )
 
-    sq1 = re.compile( "(^')|(\s+')" )
-    sq2 = re.compile( "'\s+" )
+    sq1 = re.compile(r"(^')|(\s+')")
+    sq2 = re.compile(r"'\s+")
     has_sq = False
     m = sq1.search( string )
     if m : has_sq = True
