@@ -1,25 +1,21 @@
 #!/usr/bin/python -u
 #
-# poor man's abstraction layer for pgdb and sqlite3
+# poor man's abstraction layer for psycopg2 and sqlite3
 #
-# this will replace ":NAME" placeholders in SQL statements with "%(NAME)s" if the engine is pgdb
+# this will replace ":NAME" placeholders in SQL statements with "%(NAME)s" if the engine is psycopg2
 # input SQL has to use ":NAME" and must include all the proper quoting and schema names etc.
 # all parameters must be named, there's no support for '?'/'%s' placeholders
-#
-# note that connection.autocommit does not work in pgdb but setting it is not an error.
-#
+##
 
 
 
 import sys
 import os
 import configparser
-import pgdb
+import psycopg2
 import sqlite3
 import re
 import pprint
-import csv
-#import json
 
 # self
 #
@@ -29,10 +25,10 @@ import starobj
 
 class DbWrapper( starobj.BaseClass ) :
 
-    """Simple stupid wrapper for sqlite3 and pgdb"""
+    """Simple stupid wrapper for sqlite3 and psycopg2"""
 
     CONNECTIONS = ("dictionary", "entry")
-    ENGINES = ("pgdb", "sqlite3")
+    ENGINES = ("psycopg2", "sqlite3")
 
 ####################################################################################################
 # wrapper for cursor because the one in sqlite3 is not an iterator
@@ -246,11 +242,11 @@ class DbWrapper( starobj.BaseClass ) :
 #  "entry"|"dictionary" : {
 #      "conn" : connection
 #      "curs" : cursor (pre-create one for simple stuff)
-#      "engine" : "pgdb"|"sqlite3"
+#      "engine" : "psycopg2"|"sqlite3"
 #      "schema" : db schema
 #  }
 #
-# "engine" is for fixing pgdb's quoting style
+# "engine" is for fixing psycopg2's quoting style
 #
 
     #
@@ -278,7 +274,7 @@ class DbWrapper( starobj.BaseClass ) :
                 schema = self._props.get( section, "schema" )
             if schema is not None :
                 self._connections[section]["schema"] = schema
-            if engine == "pgdb" :
+            if engine == "psycopg2" :
                 host = None
                 if self._props.has_option( section, "host" ) :
                     host = self._props.get( section, "host" )
@@ -289,10 +285,10 @@ class DbWrapper( starobj.BaseClass ) :
                 if self._props.has_option( section, "password" ) :
                     passwd = self._props.get( section, "password" )
 
-                self._connections[section]["conn"] = pgdb.connect( user = user, password = passwd,
+                self._connections[section]["conn"] = psycopg2.connect( user = user, password = passwd,
                         host = host, database = db )
                 self._connections[section]["curs"] = self._connections[section]["conn"].cursor()
-                self._connections[section]["engine"] = "pgdb"
+                self._connections[section]["engine"] = "psycopg2"
             else :
                 self._connections[section]["conn"] = sqlite3.connect( db )
                 self._connections[section]["curs"] = self._connections[section]["conn"].cursor()
@@ -331,9 +327,9 @@ class DbWrapper( starobj.BaseClass ) :
         if params is not None :
             assert isinstance( params, dict )
 
-# if it's pgdb, replace :NAME with %(NAME)s
+# if it's psycopg2, replace :NAME with %(NAME)s
 #
-        if (self._connections[connection]["engine"] == "pgdb") and (params is not None) :
+        if (self._connections[connection]["engine"] == "psycopg2") and (params is not None) :
             stmt = self._param_pat.sub( r"%(\g<2>)s", sql )
         else :
             stmt = sql
