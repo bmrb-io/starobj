@@ -5,14 +5,14 @@
 # requires postgesql 9 : order by columns not in select clause.
 #
 
-from __future__ import absolute_import
+
 
 import sys
 import os
 import re
 import pprint
 import collections
-import cStringIO
+import io
 
 
 # self
@@ -455,7 +455,7 @@ class StarWriter( starobj.BaseClass ) :
 #
                     tmp = starobj.toascii( row[i] )
                     tmp = re.sub( r"\s+", "", tmp )
-                    buf = cStringIO.StringIO()
+                    buf = io.StringIO()
                     for j in range( 1, len( tmp ) + 1 ) :
                         buf.write( tmp[j - 1] )
                         if ((j % 20) == 0) and (j != 1) : buf.write( "\n" )
@@ -622,7 +622,7 @@ class StarWriter( starobj.BaseClass ) :
                 else :
                     if self._verbose :
                         sys.stdout.write( "len(val)=%d, width[i]=%d, range:" % (len(val), widths[rows.columns[i]]) )
-                        pprint.pprint( range( len( val ), widths[rows.columns[i]] ) )
+                        pprint.pprint( list(range( len( val ), widths[rows.columns[i]])) )
 
 # can't have spaces in framecodes
 #
@@ -669,9 +669,9 @@ class StarWriter( starobj.BaseClass ) :
 #
 if __name__ == "__main__" :
 
-    import ConfigParser
+    import configparser
 
-    cp = ConfigParser.SafeConfigParser()
+    cp = configparser.SafeConfigParser()
     cp.read( sys.argv[1] )
 
     wrp = starobj.DbWrapper( config = cp, verbose = False ) # True )

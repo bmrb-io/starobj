@@ -4,7 +4,7 @@
 #
 #
 
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -43,7 +43,7 @@ class NMRSTAREntry( starobj.BaseClass ) :
         if verbose :
             sys.stdout.write( sql + "\n" )
         rs = db.query( cls.CONNECTION, sql )
-        row = rs.next()
+        row = next(rs)
         if verbose :
             pprint.pprint( row )
         rc = 0

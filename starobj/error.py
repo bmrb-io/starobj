@@ -4,7 +4,7 @@
 
 """error message class"""
 
-from __future__ import absolute_import
+
 
 
 #
@@ -43,6 +43,6 @@ class Error( object ) :
 #
 #
 if __name__ == "__main__" :
-    print "Nothing to see here"
+    print("Nothing to see here")
 #
 #

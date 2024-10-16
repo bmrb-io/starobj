@@ -2,7 +2,7 @@
 #
 #
 
-from __future__ import absolute_import
+
 
 # suggested by one of the PEPs, probably doesn't do anything
 #

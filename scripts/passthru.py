@@ -4,11 +4,11 @@
 
 """parse/unparse"""
 
-from __future__ import absolute_import
+
 
 import sys
 import os
-import ConfigParser
+import configparser
 import argparse
 
 STAROBJ_DIR = os.path.abspath( os.path.join( os.path.split( __file__ )[0], ".." ) )
@@ -81,7 +81,7 @@ if __name__ == "__main__" :
     args = ap.parse_args()
 
 
-    cp = ConfigParser.SafeConfigParser()
+    cp = configparser.SafeConfigParser()
     cp.read( args.conffile )
 
     passthru( cp, infile = args.infile, outfile = args.outfile, public = args.public, alltags = args.all_tags, 

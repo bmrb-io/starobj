@@ -9,11 +9,11 @@
 # note that connection.autocommit does not work in pgdb but setting it is not an error.
 #
 
-from __future__ import absolute_import
+
 
 import sys
 import os
-import ConfigParser
+import configparser
 import pgdb
 import sqlite3
 import re
@@ -54,7 +54,7 @@ class DbWrapper( starobj.BaseClass ) :
             if rc is None :
                 raise StopIteration
             return rc
-        def next( self ) :
+        def __next__( self ) :
 #            print "ResultSet: next",
             return self.__next__()
         @property
@@ -160,17 +160,17 @@ class DbWrapper( starobj.BaseClass ) :
             if self._verbose :
                 sys.stdout.write( "%s.keys()\n" % (self.__class__.__name__,) )
             assert isinstance( self._items, dict )
-            return self._items.keys()
+            return list(self._items.keys())
         def values( self ) :
             if self._verbose :
                 sys.stdout.write( "%s.values()\n" % (self.__class__.__name__,) )
             assert isinstance( self._items, dict )
-            return self._items.values()
+            return list(self._items.values())
         def items( self ) :
             if self._verbose :
                 sys.stdout.write( "%s.items()\n" % (self.__class__.__name__,) )
             assert isinstance( self._items, dict )
-            return self._items.items()
+            return list(self._items.items())
 
         #
         #
@@ -207,7 +207,7 @@ class DbWrapper( starobj.BaseClass ) :
 
 # make sure primary key is in there. It may not be the last inserted ID.
 #
-            have_sfid = (("Sf_ID" in self._items.keys()) and (self._items["Sf_ID"] is not None))
+            have_sfid = (("Sf_ID" in list(self._items.keys())) and (self._items["Sf_ID"] is not None))
             if not have_sfid :
                 self._items["Sf_ID"] = starobj.NMRSTAREntry.last_sfid( db = self._db )
 
@@ -257,7 +257,7 @@ class DbWrapper( starobj.BaseClass ) :
     #
     def __init__( self, config, *args, **kwargs ) :
         super( self.__class__, self ).__init__( *args, **kwargs )
-        assert isinstance( config, ConfigParser.ConfigParser )
+        assert isinstance( config, configparser.ConfigParser )
         self._props = config
         self._connections = {}
         self._param_pat = re.compile( r"(:(\w+))" )
@@ -266,7 +266,7 @@ class DbWrapper( starobj.BaseClass ) :
     #
     def connect( self ) :
         if self._verbose : sys.stdout.write( self.__class__.__name__ + ".connect()\n" )
-        assert isinstance( self._props, ConfigParser.ConfigParser )
+        assert isinstance( self._props, configparser.ConfigParser )
 
         for section in self.CONNECTIONS :
             engine = self._props.get( section, "engine" )
@@ -378,7 +378,7 @@ class DbWrapper( starobj.BaseClass ) :
 #
 if __name__ == "__main__" :
 
-    cp = ConfigParser.SafeConfigParser()
+    cp = configparser.SafeConfigParser()
     cp.read( sys.argv[1] )
 
     wrp = DbWrapper( config = cp, verbose = True )

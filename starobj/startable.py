@@ -4,7 +4,7 @@
 #  this is the part that does the dirty work
 #
 
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -114,7 +114,7 @@ class DataTable( starobj.BaseClass ) :
     #
     #
     def __next__( self ) :
-        return self.next()
+        return next(self)
 
     #
     #
@@ -331,7 +331,7 @@ class DataTable( starobj.BaseClass ) :
             sort = 'cast("Peak_ID" as integer),"Measurement_method",cast("Intensity_val" as float)'
 
         if self._table == "Peak_char" :
-            if self._verbose : print "Table is Peak_char:", self._table
+            if self._verbose : print(("Table is Peak_char:", self._table))
             sort = 'cast("Peak_ID" as integer),cast("Spectral_dim_ID" as integer)'
 
         if self._table == "Assigned_peak_chem_shift" :
@@ -382,13 +382,13 @@ class DataTable( starobj.BaseClass ) :
     #
     # return only "real data" columns
     #
-    def next( self ) :
+    def __next__( self ) :
         if self._verbose :
             sys.stdout.write( "%s._next()\n" % (self.__class__.__name__,) )
         if self._rs is None :
             self._start_iteration()
 
-        row = self._rs.next()
+        row = next(self._rs)
         if self._verbose :
             sys.stdout.write( "___ data table: next row\n" )
             pprint.pprint( row )
@@ -401,5 +401,5 @@ class DataTable( starobj.BaseClass ) :
 #
 #
 if __name__ == "__main__" :
-    print "Nothing to see here"
+    print("Nothing to see here")
 #

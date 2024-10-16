@@ -1,13 +1,13 @@
 #!/usr/bin/python -u
 #
 
-from __future__ import absolute_import
+
 
 import sys
 import os
 import re
 import collections
-import ConfigParser
+import configparser
 import pprint
 
 # self
@@ -1022,7 +1022,7 @@ class StarDictionary( starobj.BaseClass ) :
 #
 if __name__ == "__main__" :
 
-    cp = ConfigParser.SafeConfigParser()
+    cp = configparser.SafeConfigParser()
     cp.read( sys.argv[1] )
 
     wrp = starobj.DbWrapper( config = cp, verbose = True )

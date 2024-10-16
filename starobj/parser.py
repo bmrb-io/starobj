@@ -2,7 +2,7 @@
 #
 #
 
-from __future__ import absolute_import
+
 
 import sys
 import os
@@ -379,9 +379,9 @@ class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.Err
 #
 if __name__ == "__main__" :
 
-    import ConfigParser
+    import configparser
 
-    cp = ConfigParser.SafeConfigParser()
+    cp = configparser.SafeConfigParser()
     cp.read( sys.argv[1] )
 
     wrp = starobj.DbWrapper( config = cp, verbose = True )
