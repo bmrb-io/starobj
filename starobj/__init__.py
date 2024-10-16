@@ -2,34 +2,28 @@
 #
 #
 
-
-
 # suggested by one of the PEPs, probably doesn't do anything
 #
 if __name__ == "__main__" and __package__ == None :
     __package__ = "starobj"
 
-import sys
-PY3 = (sys.version_info[0] == 3)
-if PY3 : raise NotImplementedError( "python 3 no use" )
-
-import unicodedata
 import re
-
-#SAS_PATH = "/share/dmaziuk/projects/sas/SAS/python/"
-SAS_PATH = "/bmrb/lib/python27"
-sys.path.append( SAS_PATH )
-import sas
+import sys
+import unicodedata
 
 from ._baseclass import BaseClass
-
-from .error import Error
 from .db import DbWrapper
-from .stardict import StarDictionary
-from .parser import StarParser
-from .unparser import StarWriter
-from .startable import DataTable
 from .entry import NMRSTAREntry
+from .error import Error
+from .parser import StarParser
+from .stardict import StarDictionary
+from .startable import DataTable
+from .unparser import StarWriter
+
+SAS_PATH = "/projects/BMRB/software/SAS3"
+sys.path.append( SAS_PATH )
+
+import sas
 
 # wrap long values in semicolons
 #
@@ -201,7 +195,7 @@ def check_quote( value, verbose = False ) :
 
 #
 #
-__all__ = ["PY3", "LONG_VALUE", "ENCODING",
+__all__ = ["LONG_VALUE", "ENCODING",
             "sas",
             "isascii", "toascii", "sanitize", "check_quote",
             "BaseClass", "Error", "DbWrapper",
