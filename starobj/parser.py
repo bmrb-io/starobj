@@ -20,7 +20,7 @@ import starobj
 # Entry loader
 #
 #
-class StarParser( starobj.BaseClass, starobj.sas.ContentHandler, starobj.sas.ErrorHandler ) :
+class StarParser:
 
     """NMR-STAR parser for DB loader"""
 
