@@ -50,9 +50,7 @@ class DbWrapper( starobj.BaseClass ) :
             if rc is None :
                 raise StopIteration
             return rc
-        def __next__( self ) :
-#            print "ResultSet: next",
-            return self.__next__()
+
         @property
         def cursor( self ) :
             """underlying cursor"""
