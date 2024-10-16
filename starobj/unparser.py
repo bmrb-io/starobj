@@ -509,7 +509,7 @@ class StarWriter( starobj.BaseClass ) :
     def _find_col_widths( self, table, tags, sfid, framecodes ) :
         if self._verbose :
             sys.stdout.write( "%s._find_col_widths( %s, %s )\n" % (self.__class__.__name__,table,str( sfid )) )
-        assert isinstance( tags, collections.Iterable )
+        assert isinstance( tags, collections.abc.Iterable )
         assert len( tags ) > 0
 
 # can't just query for max(length(TAG)) because that doesn't factor in the quoting

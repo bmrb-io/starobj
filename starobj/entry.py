@@ -63,7 +63,7 @@ class NMRSTAREntry( starobj.BaseClass ) :
 
         assert isinstance( dictionary, starobj.StarDictionary )
         assert isinstance( db, starobj.DbWrapper )
-        if tables is not None : assert isinstance( tables, collections.Iterable )
+        if tables is not None : assert isinstance( tables, collections.abc.Iterable )
 
         cols = []
         for table in dictionary.iter_tables() :
@@ -263,7 +263,7 @@ class NMRSTAREntry( starobj.BaseClass ) :
     #
     def iter_values( self, table, columns, sfid = None, entryid = None, distinct = False ) :
         if self._verbose : sys.stdout.write( "%s.iter_values( %s )\n" % (self.__class__.__name__,table,) )
-        assert isinstance( columns, collections.Iterable )
+        assert isinstance( columns, collections.abc.Iterable )
         colstr = '","'.join( i for i in columns )
 
         scam = self._db.schema( self.CONNECTION )

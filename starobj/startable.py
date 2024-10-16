@@ -103,7 +103,7 @@ class DataTable( starobj.BaseClass ) :
         return self._tags
     @tags.setter
     def tags( self, tags ) :
-        assert isinstance( tags, collections.Iterable )
+        assert isinstance( tags, collections.abc.Iterable )
         self._tags = list( tags )
 
     #

@@ -202,14 +202,14 @@ class StarDictionary( starobj.BaseClass ) :
 
         cols = ["sfcategory"]
         if columns is not None :
-            assert isinstance( columns, collections.Iterable )
+            assert isinstance( columns, collections.abc.Iterable )
             for col in columns :
                 if col == "sfcategory" : pass
                 cols.append( col )
 
         conds = []
         if which is not None :
-            assert isinstance( which, collections.Iterable )
+            assert isinstance( which, collections.abc.Iterable )
             for i in which :
                 kind = str( i ).lower()
                 if kind == "all" :
@@ -416,12 +416,12 @@ class StarDictionary( starobj.BaseClass ) :
 
         ins = None
         if sfcategories is not None :
-            assert isinstance( sfcategories, collections.Iterable )
+            assert isinstance( sfcategories, collections.abc.Iterable )
             ins = "','".join( cat for cat in sfcategories )
 
         conds = []
         if which is not None :
-            assert isinstance( which, collections.Iterable )
+            assert isinstance( which, collections.abc.Iterable )
             for i in which :
                 kind = str( i ).lower()
                 if kind == "all" :
@@ -606,7 +606,7 @@ class StarDictionary( starobj.BaseClass ) :
         cols = ["tagcategory","tagfield"]
 
         if columns is not None :
-            assert isinstance( columns, collections.Iterable )
+            assert isinstance( columns, collections.abc.Iterable )
             for col in columns :
                 if col in cols : continue
                 cols.append( col )
@@ -615,17 +615,17 @@ class StarDictionary( starobj.BaseClass ) :
 #
         sfcatstr = None
         if sfcategories is not None :
-            assert isinstance( sfcategories, collections.Iterable )
+            assert isinstance( sfcategories, collections.abc.Iterable )
             sfcatstr = "originalcategory in ('%s')" % ("','".join( c for c in sfcategories ),)
 
         tablestr = None
         if tables is not None :
-            assert isinstance( tables, collections.Iterable )
+            assert isinstance( tables, collections.abc.Iterable )
             sfcatstr = "tagcategory in ('%s')" % ("','".join( c for c in tables ),)
 
         oars = []
         if which is not None :
-            assert isinstance( which, collections.Iterable )
+            assert isinstance( which, collections.abc.Iterable )
             for i in which :
                 kind = str( i ).lower()
                 if kind == "all" :
@@ -735,7 +735,7 @@ class StarDictionary( starobj.BaseClass ) :
         qry = "select a.tagcategory,a.tagfield,a.internalflag,p.printflag from " + tbl
 
         if tables is not None :
-            assert isinstance( tables, collections.Iterable )
+            assert isinstance( tables, collections.abc.Iterable )
             qry += " where a.tagcategory in ('%s')" % ("','".join( c for c in tables ),)
         qry += " order by a.dictionaryseq"
 
@@ -768,7 +768,7 @@ class StarDictionary( starobj.BaseClass ) :
         qry += tbl
         qry += " where datumcountflgs is not null"
         if tables is not None :
-            assert isinstance( tables, collections.Iterable )
+            assert isinstance( tables, collections.abc.Iterable )
             qry += " and tagcategory in ('%s')" % ("','".join( c for c in tables ),)
         qry += " order by dictionaryseq"
 
