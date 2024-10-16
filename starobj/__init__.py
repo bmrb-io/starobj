@@ -20,7 +20,7 @@ from .stardict import StarDictionary
 from .startable import DataTable
 from .unparser import StarWriter
 
-SAS_PATH = "/projects/BMRB/software/SAS3"
+SAS_PATH = "/projects/BMRB/software/SAS3/python"
 sys.path.append( SAS_PATH )
 
 import sas
