@@ -63,7 +63,7 @@ class StarParser:
         if not os.path.exists( filename ) :
             raise IOError( "File not found: %s" % (filename,) )
         rc = False
-        with open( filename, "rb" ) as inf :
+        with open( filename, "r" ) as inf :
             rc = cls.parse( fp = inf, db = db, dictionary = dictionary, errlist = errlist, types = types,
                     create_tables = create_tables, verbose = verbose )
         return rc
@@ -200,11 +200,11 @@ class StarParser:
     #
     def startData( self, line, name ) :
         self._entryid = name
-        try :
-            name.decode( starobj.ENCODING )
-        except UnicodeError :
-            self._errlist.append( starobj.Error( starobj.Error.ERR, line, self.SRC,
-                    "Data block ID not an %s string: %s" % (starobj.ENCODING, name) ) )
+        # try :
+        #     name.decode( starobj.ENCODING )
+        # except UnicodeError :
+        #     self._errlist.append( starobj.Error( starobj.Error.ERR, line, self.SRC,
+        #             "Data block ID not an %s string: %s" % (starobj.ENCODING, name) ) )
 
         if self._create_tables :
             starobj.NMRSTAREntry.create_tables( dictionary = self._dictionary, db = self._db,
@@ -222,11 +222,11 @@ class StarParser:
         assert self._stat is not None
         self._table_name = None
         self._free_table = None
-        try :
-            name.decode( starobj.ENCODING )
-        except UnicodeError :
-            self._errlist.append( starobj.Error( starobj.Error.ERR, line, self.SRC,
-                "Saveframe name not an %s string: %s" % (starobj.ENCODING, name) ) )
+        # try :
+        #     name.decode( starobj.ENCODING )
+        # except UnicodeError :
+        #     self._errlist.append( starobj.Error( starobj.Error.ERR, line, self.SRC,
+        #         "Saveframe name not an %s string: %s" % (starobj.ENCODING, name) ) )
 
         self._entry.insert_saveframe( name = name, line = line )
 
@@ -309,19 +309,19 @@ class StarParser:
 
 # basic checks first
 #
-        try :
-            tag.decode( starobj.ENCODING )
-        except UnicodeError :
-            self._errlist.append( starobj.Error( starobj.Error.ERR, tagline, self.SRC, \
-                "Tag is not an %s string: %s" % (starobj.ENCODING, tag) ) )
-            return True
+        # try :
+        #     tag.decode( starobj.ENCODING )
+        # except UnicodeError :
+        #     self._errlist.append( starobj.Error( starobj.Error.ERR, tagline, self.SRC, \
+        #         "Tag is not an %s string: %s" % (starobj.ENCODING, tag) ) )
+        #     return True
 
-        if val is not None :
-            try :
-                val.decode( starobj.ENCODING )
-            except UnicodeError :
-                self._errlist.append( starobj.Error( starobj.Error.ERR, valline, self.SRC, \
-                    "Value is not an %s string: %s" % (starobj.ENCODING, val[:30]) ) )
+        # if val is not None :
+        #     try :
+        #         val.decode( starobj.ENCODING )
+        #     except UnicodeError :
+        #         self._errlist.append( starobj.Error( starobj.Error.ERR, valline, self.SRC, \
+        #             "Value is not an %s string: %s" % (starobj.ENCODING, val[:30]) ) )
 
         m = self._tag_pat.search( tag )
         if not m :

@@ -89,10 +89,7 @@ def toascii( s ) :
     if s is None : return None
     v = str( s )
     if isascii( v ) : return v
-    if sys.version_info[0] == 3 :
-        return unicodedata.normalize( "NFKD", v ).encode('ascii','ignore').decode()
-    else :
-        return unicodedata.normalize( "NFKD", v.decode( "utf-8" ) ).encode( "ascii", "ignore" )
+    return unicodedata.normalize( "NFKD", v ).encode('ascii','ignore').decode()
 
 # this does rstrip() because we probably never want to keep trailing whitespace
 #

@@ -56,7 +56,7 @@ class StarWriter( starobj.BaseClass ) :
     def pretty_print_file( cls, entry, dictionary, filename, errlist = None, entryid = None, comments = True,
             public = True, alltage = False, sfids = False, verbose = False ) :
         rc = None
-        with open( filename, "wb" ) as out :
+        with open( filename, "w" ) as out :
             rc = cls.pretty_print( cls, entry, dictionary, out, errlist, entryid, comments, public, alltags, sfids, verbose )
         return rc
 
