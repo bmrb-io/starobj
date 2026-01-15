@@ -2,6 +2,13 @@
 #
 #
 
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("bmrb-starobj")
+except PackageNotFoundError:
+    __version__ = "unknown"
+
 # suggested by one of the PEPs, probably doesn't do anything
 #
 if __name__ == "__main__" and __package__ == None :
@@ -19,9 +26,6 @@ from .parser import StarParser
 from .stardict import StarDictionary
 from .startable import DataTable
 from .unparser import StarWriter
-
-SAS_PATH = "/projects/BMRB/software/SAS3/python"
-sys.path.append( SAS_PATH )
 
 import sas
 
@@ -192,7 +196,7 @@ def check_quote( value, verbose = False ) :
 
 #
 #
-__all__ = ["LONG_VALUE", "ENCODING",
+__all__ = ["__version__", "LONG_VALUE", "ENCODING",
             "sas",
             "isascii", "toascii", "sanitize", "check_quote",
             "BaseClass", "Error", "DbWrapper",

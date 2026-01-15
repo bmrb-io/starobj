@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bmrb-starobj"
+version = "1.0.0"
+description = "Table-based storage for BMRB's NMR-STAR 3.x"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [
+    {name = "BMRB", email = "help@bmrb.io"}
+]
+keywords = ["NMR-STAR", "BMRB", "NMR", "spectroscopy", "database"]
+dependencies = [
+    "bmrb-sas==1.0.0",
+    "ply>=3.11,<3.12",
+    "psycopg2>=2.9",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[project.urls]
+Homepage = "https://github.com/bmrb-io/starobj"
+Repository = "https://github.com/bmrb-io/starobj"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["starobj*"]
